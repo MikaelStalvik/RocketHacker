@@ -1,0 +1,44 @@
+﻿<Window x:Class="RocketModder.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RocketModder"
+        mc:Ignorable="d"
+        Title="Rocket hacker - A Bitbendaz tool" Height="450" Width="800">
+    <Grid Margin="8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ListBox Grid.Row="0" Grid.Column="0" x:Name="SelectedRocketFilesLb" HorizontalContentAlignment="Stretch" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="48"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Filename}" Grid.Column="0"/>
+                            <TextBlock Text="{Binding Offset}" Foreground="Silver" Grid.Column="1"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,8,0,0">
+                <TextBlock Text="Offset:" Width="80"/>
+                <TextBox Text="{Binding SelectedItem.Offset, Mode=TwoWay}" Width="80"/>
+            </DockPanel>
+
+            <DockPanel Grid.Row="2" Grid.Column="0" LastChildFill="False" Margin="0,8,0,0">
+                <Button Content="Add files" Width="80" Command="{Binding AddFilesCommand}"/>
+                <Button Content="Save file" Width="80" Command="{Binding SaveFileCommand}" Margin="4,0,0,0"/>
+                <Button Content="Adjust" Width="80" Command="{Binding AdjustCommand}" DockPanel.Dock="Right"/>
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Window>
