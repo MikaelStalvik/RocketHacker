@@ -58,7 +58,7 @@ namespace RocketModder
                 var sfd = new SaveFileDialog {Filter = "Rocket files|*.rocket"};
                 if (sfd.ShowDialog() == true)
                 {
-
+                    GenerateFile(sfd.FileName);
                 }
             });
             CalculateCommand = new RelayCommand(ExecuteCalculate);
@@ -112,12 +112,30 @@ namespace RocketModder
             return qry.ToList();
         }
 
-        private string GenerateFile(List<List<TrackItem>> rockets, List<int> offsets)
+        private void CleanDuplicates(List<TrackItem> data)
+        {
+            foreach (var track in data)
+            {
+                var keys = track.Keys.ToList();
+                var newKeys = new List<KeyItem>();
+                foreach (var item in keys)
+                {
+                    var exists = newKeys.FirstOrDefault(x => x.Row == item.Row);
+                    if (exists == null)
+                    {
+                        newKeys.Add(item);
+                    }
+                }
+                track.Keys = newKeys;
+            }
+        }
+
+        private void GenerateFile(string filename)
         {
             var resdata = new List<TrackItem>();
-            for (var i = 0; i < rockets.Count; i++)
+            for (var i = 0; i < SelectedRocketFiles.Count; i++)
             {
-                var rocket = rockets[i];
+                var rocket = ReadRocketFile(SelectedRocketFiles[i].Filename);
                 for (var j = 0; j < rocket.Count; j++)
                 {
                     var item = rocket[j];
@@ -129,7 +147,7 @@ namespace RocketModder
                     else
                     {
                         // add all keys
-                        var ofs = offsets[i];
+                        var ofs = SelectedRocketFiles[i].Offset;
                         var existingKeys = existing.Keys.ToList();
                         foreach (var key in item.Keys)
                         {
@@ -145,6 +163,7 @@ namespace RocketModder
                     }
                 }
             }
+            CleanDuplicates(resdata);
 
             // all data aggregated, generate XML
             var xd = new XDocument(new XElement("rootElement",
@@ -168,8 +187,7 @@ namespace RocketModder
                     )
                 )));
 
-
-            return string.Empty;
+            xd.Save(filename);
         }
     }
 }
