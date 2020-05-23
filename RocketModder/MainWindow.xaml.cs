@@ -21,6 +21,11 @@ namespace RocketModder
             InitializeComponent();
             DataContext = _vm;
             SelectedRocketFilesLb.ItemsSource = _vm.SelectedRocketFiles;
+            _vm.UpdateUiAction += () =>
+            {
+                SelectedRocketFilesLb.ItemsSource = null;
+                SelectedRocketFilesLb.ItemsSource = _vm.SelectedRocketFiles;
+            };
         }
 
 

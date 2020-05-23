@@ -20,10 +20,12 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="48"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding Filename}" Grid.Column="0"/>
-                            <TextBlock Text="{Binding Offset}" Foreground="Silver" Grid.Column="1"/>
+                            <TextBlock Text="Offset:" Foreground="Silver" Grid.Column="1"/>
+                            <TextBlock Text="{Binding Offset}" Foreground="Silver" Grid.Column="2"/>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -37,6 +39,7 @@
             <DockPanel Grid.Row="2" Grid.Column="0" LastChildFill="False" Margin="0,8,0,0">
                 <Button Content="Add files" Width="80" Command="{Binding AddFilesCommand}"/>
                 <Button Content="Save file" Width="80" Command="{Binding SaveFileCommand}" Margin="4,0,0,0"/>
+                <Button Content="Calculate" Width="80" Command="{Binding CalculateCommand}" Margin="4,0,0,0"/>
                 <Button Content="Adjust" Width="80" Command="{Binding AdjustCommand}" DockPanel.Dock="Right"/>
             </DockPanel>
         </Grid>

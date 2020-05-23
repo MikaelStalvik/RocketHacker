@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -12,6 +13,7 @@ namespace RocketModder
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        public Action UpdateUiAction { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
@@ -35,6 +37,7 @@ namespace RocketModder
 
         public RelayCommand AddFilesCommand { get; set; }
         public RelayCommand SaveFileCommand { get; set; }
+        public RelayCommand CalculateCommand { get; set; }
 
         public MainViewModel()
         {
@@ -58,9 +61,37 @@ namespace RocketModder
 
                 }
             });
+            CalculateCommand = new RelayCommand(ExecuteCalculate);
         }
 
-        private List<TrackItem> readRocketFile(string filename)
+        private void ExecuteCalculate(object obj)
+        {
+            var maxList = new List<int>();
+            foreach (var rocketFile in SelectedRocketFiles)
+            {
+                var rocket = ReadRocketFile(rocketFile.Filename);
+                var highest = -999;
+                foreach (var track in rocket)
+                {
+                    if (track.Keys.Any())
+                    {
+                        var keys = track.Keys.ToList();
+                        var highestRow = keys.Max(x => x.Row);
+                        if (highestRow > highest) highest = highestRow;
+                    }
+                }
+                maxList.Add(highest);
+            }
+
+            for (var i = 1; i < SelectedRocketFiles.Count; i++)
+            {
+                SelectedRocketFiles[i].Offset = maxList[i - 1];
+            }
+            OnPropertyChanged(nameof(SelectedRocketFiles));
+            UpdateUiAction?.Invoke();
+        }
+
+        private List<TrackItem> ReadRocketFile(string filename)
         {
             var xml = XDocument.Load(filename);
             var qry = from c in xml.Descendants("track")
@@ -81,7 +112,7 @@ namespace RocketModder
             return qry.ToList();
         }
 
-        private string generateFile(List<List<TrackItem>> rockets, List<int> offsets)
+        private string GenerateFile(List<List<TrackItem>> rockets, List<int> offsets)
         {
             var resdata = new List<TrackItem>();
             for (var i = 0; i < rockets.Count; i++)
