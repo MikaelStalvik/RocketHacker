@@ -66,6 +66,7 @@ namespace RocketModder
 
         private void ExecuteCalculate(object obj)
         {
+            var prevOffset = 0;
             var maxList = new List<int>();
             foreach (var rocketFile in SelectedRocketFiles)
             {
@@ -80,7 +81,8 @@ namespace RocketModder
                         if (highestRow > highest) highest = highestRow;
                     }
                 }
-                maxList.Add(highest);
+                maxList.Add(highest + prevOffset);
+                prevOffset = highest + prevOffset;
             }
 
             for (var i = 1; i < SelectedRocketFiles.Count; i++)
