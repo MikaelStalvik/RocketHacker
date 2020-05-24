@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using RocketModder.Annotations;
 
@@ -35,6 +36,8 @@ namespace RocketModder
         public string Filename { get; set; }
         public int Offset { get; set; }
         public TimeSpan OffsetInTime { get; set; }
+        public int MaxLength { get; set; }
+        public TimeSpan LengthInTime { get; set; }
     }
 
     public class TracksHeader : INotifyPropertyChanged
@@ -53,4 +56,9 @@ namespace RocketModder
         }
     }
 
+    public class ProjectHolder
+    {
+        public TracksHeader TracksHeader { get; set; }
+        public List<RocketFile> RocketFiles { get; set; }
+    }
 }

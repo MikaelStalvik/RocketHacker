@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using RocketModder.Annotations;
 
 namespace RocketModder
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public sealed class MainViewModel : INotifyPropertyChanged
     {
         public Action UpdateUiAction { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -64,6 +66,8 @@ namespace RocketModder
         public RelayCommand AddFilesCommand { get; set; }
         public RelayCommand SaveFileCommand { get; set; }
         public RelayCommand CalculateCommand { get; set; }
+        public RelayCommand LoadProjectCommand { get; set; }
+        public RelayCommand SaveProjectCommand { get; set; }
 
         public MainViewModel()
         {
@@ -89,6 +93,33 @@ namespace RocketModder
                 }
             });
             CalculateCommand = new RelayCommand(ExecuteCalculate);
+            LoadProjectCommand = new RelayCommand(o =>
+            {
+                var ofn = new OpenFileDialog {Filter = "Projects|*.json"};
+                if (ofn.ShowDialog() == true)
+                {
+                    var json = File.ReadAllText(ofn.FileName);
+                    var prj = JsonConvert.DeserializeObject<ProjectHolder>(json);
+                    TracksHeader = prj.TracksHeader;
+                    SelectedRocketFiles = new ObservableCollection<RocketFile>(prj.RocketFiles);
+                    UpdateUiAction?.Invoke();
+                }
+            });
+            SaveProjectCommand = new RelayCommand(o =>
+            {
+                var sfn = new SaveFileDialog { Filter = "Projects|*.json"};
+                if (sfn.ShowDialog() == true)
+                {
+                    var prj = new ProjectHolder
+                    {
+                        TracksHeader = TracksHeader,
+                        RocketFiles = SelectedRocketFiles.ToList()
+                    };
+                    var json = JsonConvert.SerializeObject(prj);
+                    File.WriteAllText(sfn.FileName, json);
+                }
+            });
+
             TracksHeader = new TracksHeader
             {
                 Rows = 10000,
@@ -97,6 +128,7 @@ namespace RocketModder
                 RowsPerBeat = 8,
                 BeatsPerMin = 128
             };
+            OnPropertyChanged(nameof(TracksHeader));
         }
 
         private TimeSpan CalcOffsetInTime(int offset)
@@ -105,13 +137,13 @@ namespace RocketModder
             var l = k / (double) TracksHeader.RowsPerBeat; // 2.79
 
             return TimeSpan.FromSeconds(offset / l);
-            //var blockSize = 
         }
 
         private void ExecuteCalculate(object obj)
         {
             var prevOffset = 0;
             var maxList = new List<int>();
+            var itemMaxList = new List<int>();
             int i = 0;
             foreach (var rocketFile in SelectedRocketFiles)
             {
@@ -127,10 +159,16 @@ namespace RocketModder
                     }
                 }
                 maxList.Add(highest + prevOffset);
+                itemMaxList.Add(highest);
                 prevOffset = highest + prevOffset;
                 i++;
             }
 
+            for (i = 0; i < SelectedRocketFiles.Count; i++)
+            {
+                SelectedRocketFiles[i].MaxLength = itemMaxList[i];
+                SelectedRocketFiles[i].LengthInTime = CalcOffsetInTime(SelectedRocketFiles[i].MaxLength);
+            }
             for (i = 1; i < SelectedRocketFiles.Count; i++)
             {
                 SelectedRocketFiles[i].Offset = maxList[i - 1];
@@ -152,7 +190,8 @@ namespace RocketModder
                     RowsPerBeat = int.Parse(c.Attribute("rowsPerBeat").Value),
                     BeatsPerMin = int.Parse(c.Attribute("beatsPerMin").Value),
                 };
-            TracksHeader = hdr.FirstOrDefault();                
+            TracksHeader = hdr.FirstOrDefault(); 
+            OnPropertyChanged(nameof(TracksHeader));
         }
 
         private List<TrackItem> ReadRocketFile(string filename, bool readHeader = false)

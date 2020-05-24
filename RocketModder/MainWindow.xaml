@@ -58,11 +58,31 @@
                         </GridViewColumn>
                         <GridViewColumn HeaderTemplate="{StaticResource RightAlign}" 
                                         HeaderContainerStyle="{StaticResource HeaderStyleRight}" 
-                                        Header="TimeOffset" 
+                                        Header="Time offset" 
                                         Width="112">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding OffsetInTime}" TextAlignment="Right"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn HeaderTemplate="{StaticResource RightAlign}" 
+                                        HeaderContainerStyle="{StaticResource HeaderStyleRight}" 
+                                        Header="Max" 
+                                        Width="80">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding MaxLength}" TextAlignment="Right"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn HeaderTemplate="{StaticResource RightAlign}" 
+                                        HeaderContainerStyle="{StaticResource HeaderStyleRight}" 
+                                        Header="Length" 
+                                        Width="112">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LengthInTime}" TextAlignment="Right"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -89,10 +109,14 @@
                 <TextBox Text="{Binding SelectedOffset, Mode=TwoWay}" Width="80"/>
             </DockPanel>
 
-            <DockPanel Grid.Row="2" Grid.Column="0" LastChildFill="False" Margin="0,8,0,0">
+            <DockPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,8,0,0">
                 <Button Content="Add files" Width="80" Command="{Binding AddFilesCommand}"/>
                 <Button Content="Save file" Width="80" Command="{Binding SaveFileCommand}" Margin="4,0,0,0"/>
-                <Button Content="Calculate" Width="80" Command="{Binding CalculateCommand}" Margin="4,0,0,0"/>
+               
+                <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}" Margin="16,0,0,0"/>
+                <Button Content="Save project" Width="80" Command="{Binding SaveProjectCommand}" Margin="4,0,0,0"/>
+
+                <Button Content="Calculate" Width="80" Command="{Binding CalculateCommand}" DockPanel.Dock="Right" Margin="4,0,0,0"/>
                 <Button Content="Adjust" Width="80" Command="{Binding AdjustCommand}" DockPanel.Dock="Right"/>
             </DockPanel>
         </Grid>
