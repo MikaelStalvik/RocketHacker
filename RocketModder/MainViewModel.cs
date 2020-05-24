@@ -31,6 +31,32 @@ namespace RocketModder
             set
             {
                 _selectedItem = value;
+                if (SelectedItem != null) SelectedOffset = SelectedItem.Offset;
+                OnPropertyChanged();
+            }
+        }
+
+        private int _selectedOffset;
+        public int SelectedOffset
+        {
+            get => _selectedOffset;
+            set
+            {
+                _selectedOffset = value;
+                SelectedItem.Offset = SelectedOffset;
+                SelectedItem.OffsetInTime = CalcOffsetInTime(SelectedOffset);
+                OnPropertyChanged();
+                UpdateUiAction?.Invoke();
+            }
+        }
+
+        private TracksHeader _tracksHeader;
+        public TracksHeader TracksHeader
+        {
+            get => _tracksHeader;
+            set
+            {
+                _tracksHeader = value;
                 OnPropertyChanged();
             }
         }
@@ -50,6 +76,7 @@ namespace RocketModder
                     {
                         SelectedRocketFiles.Add(new RocketFile {Filename = file, Offset = 0});
                     }
+                    CalculateCommand.Execute(null);
                     OnPropertyChanged(nameof(SelectedRocketFiles));
                 }
             });
@@ -62,15 +89,33 @@ namespace RocketModder
                 }
             });
             CalculateCommand = new RelayCommand(ExecuteCalculate);
+            TracksHeader = new TracksHeader
+            {
+                Rows = 10000,
+                StartRow = 0,
+                EndRow = 10000,
+                RowsPerBeat = 8,
+                BeatsPerMin = 128
+            };
+        }
+
+        private TimeSpan CalcOffsetInTime(int offset)
+        {
+            var k = TracksHeader.BeatsPerMin / 60.0; // 22
+            var l = k / (double) TracksHeader.RowsPerBeat; // 2.79
+
+            return TimeSpan.FromSeconds(offset / l);
+            //var blockSize = 
         }
 
         private void ExecuteCalculate(object obj)
         {
             var prevOffset = 0;
             var maxList = new List<int>();
+            int i = 0;
             foreach (var rocketFile in SelectedRocketFiles)
             {
-                var rocket = ReadRocketFile(rocketFile.Filename);
+                var rocket = ReadRocketFile(rocketFile.Filename, i == 0);
                 var highest = -999;
                 foreach (var track in rocket)
                 {
@@ -83,19 +128,39 @@ namespace RocketModder
                 }
                 maxList.Add(highest + prevOffset);
                 prevOffset = highest + prevOffset;
+                i++;
             }
 
-            for (var i = 1; i < SelectedRocketFiles.Count; i++)
+            for (i = 1; i < SelectedRocketFiles.Count; i++)
             {
                 SelectedRocketFiles[i].Offset = maxList[i - 1];
+                SelectedRocketFiles[i].OffsetInTime = CalcOffsetInTime(SelectedRocketFiles[i].Offset);
             }
+
             OnPropertyChanged(nameof(SelectedRocketFiles));
             UpdateUiAction?.Invoke();
         }
 
-        private List<TrackItem> ReadRocketFile(string filename)
+        private void ReadHeader(XDocument xml)
+        {
+            var hdr = from c in xml.Descendants("tracks")
+                select new TracksHeader
+                {
+                    Rows = int.Parse(c.Attribute("rows").Value),
+                    StartRow = int.Parse(c.Attribute("startRow").Value),
+                    EndRow = int.Parse(c.Attribute("endRow").Value),
+                    RowsPerBeat = int.Parse(c.Attribute("rowsPerBeat").Value),
+                    BeatsPerMin = int.Parse(c.Attribute("beatsPerMin").Value),
+                };
+            TracksHeader = hdr.FirstOrDefault();                
+        }
+
+        private List<TrackItem> ReadRocketFile(string filename, bool readHeader = false)
         {
             var xml = XDocument.Load(filename);
+
+            if (readHeader) ReadHeader(xml);
+
             var qry = from c in xml.Descendants("track")
                 select new TrackItem
                 {
@@ -132,12 +197,39 @@ namespace RocketModder
             }
         }
 
+        private void SaveFile(string filename, IEnumerable<TrackItem> data)
+        {
+            // all data aggregated, generate XML
+            var xd = new XDocument(new XElement("rootElement",
+                new XElement("tracks",
+                    new XAttribute("rows", 10000),
+                    new XAttribute("startRow", 0),
+                    new XAttribute("endRow", 10000),
+                    new XAttribute("rowsPerBeat", 8),
+                    new XAttribute("beatsPerMin", 134),
+                    from track in data
+                    select new XElement("track",
+                        new XAttribute("name", track.Name),
+                        new XAttribute("color", track.Color),
+                        new XAttribute("folded", track.Folded),
+                        from key in track.Keys
+                        select new XElement("key",
+                            new XAttribute("row", key.Row),
+                            new XAttribute("value", key.Value),
+                            new XAttribute("interpolation", key.Interpolation)
+                        )
+                    )
+                )));
+
+            xd.Save(filename);
+        }
+
         private void GenerateFile(string filename)
         {
             var resdata = new List<TrackItem>();
             for (var i = 0; i < SelectedRocketFiles.Count; i++)
             {
-                var rocket = ReadRocketFile(SelectedRocketFiles[i].Filename);
+                var rocket = ReadRocketFile(SelectedRocketFiles[i].Filename, i == 0);
                 for (var j = 0; j < rocket.Count; j++)
                 {
                     var item = rocket[j];
@@ -167,29 +259,7 @@ namespace RocketModder
             }
             CleanDuplicates(resdata);
 
-            // all data aggregated, generate XML
-            var xd = new XDocument(new XElement("rootElement",
-                new XElement("tracks",
-                    new XAttribute("rows", 10000),
-                    new XAttribute("startRow", 0),
-                    new XAttribute("endRow", 10000),
-                    new XAttribute("rowsPerBeat", 8),
-                    new XAttribute("beatsPerMin", 134),
-                    from track in resdata
-                    select new XElement("track",
-                        new XAttribute("name", track.Name),
-                        new XAttribute("color", track.Color),
-                        new XAttribute("folded", track.Folded),
-                        from key in track.Keys
-                        select new XElement("key",
-                            new XAttribute("row", key.Row),
-                            new XAttribute("value", key.Value),
-                            new XAttribute("interpolation", key.Interpolation)
-                        )
-                    )
-                )));
-
-            xd.Save(filename);
+            SaveFile(filename, resdata);
         }
     }
 }

@@ -6,6 +6,13 @@
         xmlns:local="clr-namespace:RocketModder"
         mc:Ignorable="d"
         Title="Rocket hacker - A Bitbendaz tool" Height="450" Width="800">
+
+    <Window.Resources>
+        <Style TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+    </Window.Resources>
+
     <Grid Margin="8">
         <Grid>
             <Grid.RowDefinitions>
@@ -13,27 +20,73 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="128"/>
+            </Grid.ColumnDefinitions>
 
-            <ListBox Grid.Row="0" Grid.Column="0" x:Name="SelectedRocketFilesLb" HorizontalContentAlignment="Stretch" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="48"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Filename}" Grid.Column="0"/>
-                            <TextBlock Text="Offset:" Foreground="Silver" Grid.Column="1"/>
-                            <TextBlock Text="{Binding Offset}" Foreground="Silver" Grid.Column="2"/>
-                        </Grid>
+            <ListView Grid.Row="0" Grid.Column="0" ItemsSource="{Binding SelectedRocketFiles}" HorizontalAlignment="Stretch" x:Name="ListView" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                <ListView.Resources>
+                    <DataTemplate x:Key="RightAlign">
+                        <TextBlock HorizontalAlignment="Right" Text="{Binding}"/>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                    <Style x:Key="HeaderStyleRight" TargetType="GridViewColumnHeader">
+                        <Setter Property="HorizontalContentAlignment" Value="Right"/>
+                    </Style>
+                    <Style TargetType="{x:Type TextBlock}" x:Key="RightCell">
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="TextAlignment" Value="Right"/>
+                    </Style>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.Resources>
+
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Filename}" Header="Filename" Width="150"/>
+                        <GridViewColumn HeaderTemplate="{StaticResource RightAlign}" 
+                                        HeaderContainerStyle="{StaticResource HeaderStyleRight}" 
+                                        Header="Offset" 
+                                        Width="80">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Offset}" TextAlignment="Right"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn HeaderTemplate="{StaticResource RightAlign}" 
+                                        HeaderContainerStyle="{StaticResource HeaderStyleRight}" 
+                                        Header="TimeOffset" 
+                                        Width="112">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding OffsetInTime}" TextAlignment="Right"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                    </GridView>
+                </ListView.View>
+
+            </ListView>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="4">
+                <TextBlock Text="Rows"/>
+                <TextBox Text="{Binding TrackHeader.Rows, Mode=TwoWay}"/>
+                <TextBlock Text="Start row"/>
+                <TextBox Text="{Binding TrackHeader.StartRow, Mode=TwoWay}"/>
+                <TextBlock Text="End row"/>
+                <TextBox Text="{Binding TrackHeader.EndRow, Mode=TwoWay}"/>
+                <TextBlock Text="Rows per beat"/>
+                <TextBox Text="{Binding TrackHeader.RowsPerBeat, Mode=TwoWay}"/>
+            </StackPanel>
+
 
             <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,8,0,0">
                 <TextBlock Text="Offset:" Width="80"/>
-                <TextBox Text="{Binding SelectedItem.Offset, Mode=TwoWay}" Width="80"/>
+                <TextBox Text="{Binding SelectedOffset, Mode=TwoWay}" Width="80"/>
             </DockPanel>
 
             <DockPanel Grid.Row="2" Grid.Column="0" LastChildFill="False" Margin="0,8,0,0">

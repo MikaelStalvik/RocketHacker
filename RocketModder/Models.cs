@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using RocketModder.Annotations;
 
 namespace RocketModder
 {
@@ -32,6 +34,23 @@ namespace RocketModder
     {
         public string Filename { get; set; }
         public int Offset { get; set; }
+        public TimeSpan OffsetInTime { get; set; }
+    }
+
+    public class TracksHeader : INotifyPropertyChanged
+    {
+        public int Rows { get; set; }
+        public int StartRow { get; set; }
+        public int EndRow { get; set; }
+        public int RowsPerBeat { get; set; }
+        public int BeatsPerMin { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
 }
