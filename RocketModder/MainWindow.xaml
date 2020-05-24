@@ -48,7 +48,7 @@
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Filename}" Header="Filename" Width="150"/>
                         <GridViewColumn HeaderTemplate="{StaticResource RightAlign}" 
                                         HeaderContainerStyle="{StaticResource HeaderStyleRight}" 
-                                        Header="Offset" 
+                                        Header="Offset row" 
                                         Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -68,7 +68,7 @@
                         </GridViewColumn>
                         <GridViewColumn HeaderTemplate="{StaticResource RightAlign}" 
                                         HeaderContainerStyle="{StaticResource HeaderStyleRight}" 
-                                        Header="Max" 
+                                        Header="Max rows" 
                                         Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>

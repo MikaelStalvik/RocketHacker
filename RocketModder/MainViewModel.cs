@@ -133,10 +133,8 @@ namespace RocketModder
 
         private TimeSpan CalcOffsetInTime(int offset)
         {
-            var k = TracksHeader.BeatsPerMin / 60.0; // 22
-            var l = k / (double) TracksHeader.RowsPerBeat; // 2.79
-
-            return TimeSpan.FromSeconds(offset / l);
+            var rowRate = (TracksHeader.BeatsPerMin / 60.0) * TracksHeader.RowsPerBeat;
+            return TimeSpan.FromSeconds(offset / rowRate);
         }
 
         private void ExecuteCalculate(object obj)
