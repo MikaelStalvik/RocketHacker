@@ -26,6 +26,28 @@ namespace RocketModder
 
         public ObservableCollection<RocketFile> SelectedRocketFiles = new ObservableCollection<RocketFile>();
 
+        private TimeSpan _calculatedLength;
+        public TimeSpan CalculatedLength
+        {
+            get => _calculatedLength;
+            set
+            {
+                _calculatedLength = value;
+                OnPropertyChanged();
+            }
+        }
+        private int _calculateRowLength;
+        public int CalculateRowLength
+        {
+            get => _calculateRowLength;
+            set
+            {
+                _calculateRowLength = value;
+                CalculatedLength = CalcOffsetInTime(_calculateRowLength);
+                OnPropertyChanged();
+            }
+        }
+
         private RocketFile _selectedItem;
         public RocketFile SelectedItem
         {
@@ -228,6 +250,11 @@ namespace RocketModder
                     if (exists == null)
                     {
                         newKeys.Add(item);
+                    }
+                    else
+                    {
+                        exists.Value = item.Value;
+                        exists.Interpolation = item.Interpolation;
                     }
                 }
                 track.Keys = newKeys;

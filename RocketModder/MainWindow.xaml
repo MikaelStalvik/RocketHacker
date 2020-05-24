@@ -92,15 +92,10 @@
 
             </ListView>
 
-            <StackPanel Grid.Row="0" Grid.Column="1" Margin="4">
-                <TextBlock Text="Rows"/>
-                <TextBox Text="{Binding TrackHeader.Rows, Mode=TwoWay}"/>
-                <TextBlock Text="Start row"/>
-                <TextBox Text="{Binding TrackHeader.StartRow, Mode=TwoWay}"/>
-                <TextBlock Text="End row"/>
-                <TextBox Text="{Binding TrackHeader.EndRow, Mode=TwoWay}"/>
-                <TextBlock Text="Rows per beat"/>
-                <TextBox Text="{Binding TrackHeader.RowsPerBeat, Mode=TwoWay}"/>
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="3,4,11,0">
+                <TextBlock Text="Row number"/>
+                <TextBox Text="{Binding CalculateRowLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding CalculatedLength}"/>
             </StackPanel>
 
 
@@ -110,11 +105,12 @@
             </DockPanel>
 
             <DockPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,8,0,0">
-                <Button Content="Add files" Width="80" Command="{Binding AddFilesCommand}"/>
-                <Button Content="Save file" Width="80" Command="{Binding SaveFileCommand}" Margin="4,0,0,0"/>
-               
-                <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}" Margin="16,0,0,0"/>
+                <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}"/>
                 <Button Content="Save project" Width="80" Command="{Binding SaveProjectCommand}" Margin="4,0,0,0"/>
+
+                <Button Content="Add files" Width="80" Command="{Binding AddFilesCommand}" Margin="16,0,0,0"/>
+                <Button Content="Merge" Width="80" Command="{Binding SaveFileCommand}" Margin="4,0,0,0"/>
+               
 
                 <Button Content="Calculate" Width="80" Command="{Binding CalculateCommand}" DockPanel.Dock="Right" Margin="4,0,0,0"/>
                 <Button Content="Adjust" Width="80" Command="{Binding AdjustCommand}" DockPanel.Dock="Right"/>
