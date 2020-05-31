@@ -4,7 +4,7 @@ If that's the case Rocket Hacker comes to your salvation!
 
 Design your Rocket scenes individually and merge your result when you are done.
 
-![](rocket_hacker.png)
+![](https://github.com/MikaelStalvik/RocketHacker/blob/master/rocket-hacker.png)
 
 # Usage
 - Add multiple Rocket files with the add button 
