@@ -100,7 +100,11 @@
 
 
             <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,8,0,0">
-                <TextBlock Text="Offset:" Width="80"/>
+                <Button Content="+" Width="32" Command="{Binding AddFilesCommand}" Margin="0,0,0,0"/>
+                <Button Content="-" Width="32" Command="{Binding DeleteCommand}" Margin="4,0,0,0"/>
+                <Button Content="^" Width="32" Command="{Binding MoveUpCommand}" Margin="4,0,0,0"/>
+                <Button Content="˅" Width="32" Command="{Binding MoveDownCommand}" Margin="4,0,0,0"/>
+                <TextBlock Text="Offset:" Width="80" Margin="16,0,0,0"/>
                 <TextBox Text="{Binding SelectedOffset, Mode=TwoWay}" Width="80"/>
             </DockPanel>
 
@@ -108,7 +112,6 @@
                 <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}"/>
                 <Button Content="Save project" Width="80" Command="{Binding SaveProjectCommand}" Margin="4,0,0,0"/>
 
-                <Button Content="Add files" Width="80" Command="{Binding AddFilesCommand}" Margin="16,0,0,0"/>
                 <Button Content="Merge" Width="80" Command="{Binding SaveFileCommand}" Margin="4,0,0,0"/>
                
 

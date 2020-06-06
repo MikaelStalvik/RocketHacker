@@ -90,6 +90,9 @@ namespace RocketModder
         public RelayCommand CalculateCommand { get; set; }
         public RelayCommand LoadProjectCommand { get; set; }
         public RelayCommand SaveProjectCommand { get; set; }
+        public RelayCommand DeleteCommand { get; set; }
+        public RelayCommand MoveUpCommand { get; set; }
+        public RelayCommand MoveDownCommand { get; set; }
 
         public MainViewModel()
         {
@@ -141,7 +144,35 @@ namespace RocketModder
                     File.WriteAllText(sfn.FileName, json);
                 }
             });
-
+            DeleteCommand = new RelayCommand(o =>
+            {
+                if (SelectedItem != null)
+                {
+                    SelectedRocketFiles.Remove(SelectedItem);
+                }
+            });
+            MoveUpCommand = new RelayCommand(o =>
+            {
+                if (SelectedItem != null)
+                {
+                    var idx = SelectedRocketFiles.IndexOf(SelectedItem);
+                    if (idx > 0)
+                    {
+                        SelectedRocketFiles.Move(idx, idx - 1);
+                    }
+                }
+            });
+            MoveDownCommand = new RelayCommand(o =>
+            {
+                if (SelectedItem != null)
+                {
+                    var idx = SelectedRocketFiles.IndexOf(SelectedItem);
+                    if (idx < SelectedRocketFiles.Count - 1)
+                    {
+                        SelectedRocketFiles.Move(idx, idx + 1);
+                    }
+                }
+            });
             TracksHeader = new TracksHeader
             {
                 Rows = 10000,
@@ -164,7 +195,7 @@ namespace RocketModder
             var prevOffset = 0;
             var maxList = new List<int>();
             var itemMaxList = new List<int>();
-            int i = 0;
+            var i = 0;
             foreach (var rocketFile in SelectedRocketFiles)
             {
                 var rocket = ReadRocketFile(rocketFile.Filename, i == 0);
@@ -175,7 +206,10 @@ namespace RocketModder
                     {
                         var keys = track.Keys.ToList();
                         var highestRow = keys.Max(x => x.Row);
-                        if (highestRow > highest) highest = highestRow;
+                        if (highestRow > highest)
+                        {
+                            highest = highestRow;
+                        }
                     }
                 }
                 maxList.Add(highest + prevOffset);
@@ -204,11 +238,11 @@ namespace RocketModder
             var hdr = from c in xml.Descendants("tracks")
                 select new TracksHeader
                 {
-                    Rows = int.Parse(c.Attribute("rows").Value),
-                    StartRow = int.Parse(c.Attribute("startRow").Value),
-                    EndRow = int.Parse(c.Attribute("endRow").Value),
-                    RowsPerBeat = int.Parse(c.Attribute("rowsPerBeat").Value),
-                    BeatsPerMin = int.Parse(c.Attribute("beatsPerMin").Value),
+                    Rows = int.Parse(c.Attribute("rows")?.Value ?? "0"),
+                    StartRow = int.Parse(c.Attribute("startRow")?.Value ?? "0"),
+                    EndRow = int.Parse(c.Attribute("endRow")?.Value ?? "0"),
+                    RowsPerBeat = int.Parse(c.Attribute("rowsPerBeat")?.Value ?? "0"),
+                    BeatsPerMin = int.Parse(c.Attribute("beatsPerMin")?.Value ?? "0"),
                 };
             TracksHeader = hdr.FirstOrDefault(); 
             OnPropertyChanged(nameof(TracksHeader));
