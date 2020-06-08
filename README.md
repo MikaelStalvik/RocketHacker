@@ -17,8 +17,6 @@ Design your Rocket scenes individually and merge your result when you are done.
 - A Rocket editor of your choise for testing, we can recommend Emoons Rocket Editor, https://github.com/emoon/rocket
 
 # Missing features
-- Deleting of files
-- Sorting / Reordering
 - No editing of BPM/Rows per bar (read from the source file)
 
 ## Contributing
