@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using RocketModder.Annotations;
@@ -38,6 +39,7 @@ namespace RocketModder
         public TimeSpan OffsetInTime { get; set; }
         public int MaxLength { get; set; }
         public TimeSpan LengthInTime { get; set; }
+        public string HighestKey { get; set; }
     }
 
     public class TracksHeader : INotifyPropertyChanged

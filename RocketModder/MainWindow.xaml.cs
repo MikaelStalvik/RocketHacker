@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace RocketModder
 {
@@ -11,6 +14,7 @@ namespace RocketModder
         public MainWindow()
         {
             InitializeComponent();
+            _vm.GridControl = DetailsGrid;
             DataContext = _vm;
             ListView.ItemsSource = _vm.SelectedRocketFiles;
             _vm.UpdateUiAction += () =>
@@ -18,7 +22,18 @@ namespace RocketModder
                 ListView.ItemsSource = null;
                 ListView.ItemsSource = _vm.SelectedRocketFiles;
             };
+            _vm.RebindListviewAction += () =>
+            {
+                ICollectionView view = CollectionViewSource.GetDefaultView(_vm.SelectedRocketFiles);
+                view.Refresh();
+            };
+        }
 
+        private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var lv = (ListView)sender;
+            _vm.UpdateSelectedItem((RocketFile) lv.SelectedItem);
+            e.Handled = true;
         }
 
     }

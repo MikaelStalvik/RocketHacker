@@ -17,15 +17,13 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="128"/>
-            </Grid.ColumnDefinitions>
 
-            <ListView Grid.Row="0" Grid.Column="0" ItemsSource="{Binding SelectedRocketFiles}" HorizontalAlignment="Stretch" x:Name="ListView" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+            <ListView Grid.Row="0" ItemsSource="{Binding SelectedRocketFiles}" HorizontalAlignment="Stretch" x:Name="ListView" SelectionChanged="ListView_OnSelectionChanged">
                 <ListView.Resources>
                     <DataTemplate x:Key="RightAlign">
                         <TextBlock HorizontalAlignment="Right" Text="{Binding}"/>
@@ -86,34 +84,45 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=HighestKey}" Header="Highest Key" Width="150"/>
 
                     </GridView>
                 </ListView.View>
 
             </ListView>
 
-            <StackPanel Grid.Row="0" Grid.Column="1" Margin="3,4,11,0">
-                <TextBlock Text="Row number"/>
-                <TextBox Text="{Binding CalculateRowLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="{Binding CalculatedLength}"/>
-            </StackPanel>
+            <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
 
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Preview" FontWeight="Bold" Background="#dfdfdf"/>
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto">
+                    <Grid x:Name="DetailsGrid"/>
+                </ScrollViewer>
+            </Grid>
 
-            <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,8,0,0">
+            <DockPanel Grid.Row="3" LastChildFill="False" Margin="0,8,0,0">
                 <Button Content="+" Width="32" Command="{Binding AddFilesCommand}" Margin="0,0,0,0"/>
                 <Button Content="-" Width="32" Command="{Binding DeleteCommand}" Margin="4,0,0,0"/>
                 <Button Content="^" Width="32" Command="{Binding MoveUpCommand}" Margin="4,0,0,0"/>
                 <Button Content="˅" Width="32" Command="{Binding MoveDownCommand}" Margin="4,0,0,0"/>
                 <TextBlock Text="Offset:" Width="80" Margin="16,0,0,0"/>
                 <TextBox Text="{Binding SelectedOffset, Mode=TwoWay}" Width="80"/>
+                <DockPanel DockPanel.Dock="Right">
+                    <TextBlock Text="Calc. row number" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding CalculateRowLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="64"/>
+                    <TextBlock Text="{Binding CalculatedLength}" Width="64" VerticalAlignment="Center"/>
+                </DockPanel>
             </DockPanel>
 
-            <DockPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,8,0,0">
+            <DockPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,8,0,0">
                 <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}"/>
                 <Button Content="Save project" Width="80" Command="{Binding SaveProjectCommand}" Margin="4,0,0,0"/>
 
-                <Button Content="Merge" Width="80" Command="{Binding SaveFileCommand}" Margin="4,0,0,0"/>
-               
+                <Button Content="Merge" Width="80" Command="{Binding SaveFileCommand}" Margin="8,0,0,0"/>
 
                 <Button Content="Calculate" Width="80" Command="{Binding CalculateCommand}" DockPanel.Dock="Right" Margin="4,0,0,0"/>
                 <Button Content="Adjust" Width="80" Command="{Binding AdjustCommand}" DockPanel.Dock="Right"/>

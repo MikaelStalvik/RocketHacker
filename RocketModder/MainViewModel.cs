@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Xml.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using RocketModder.Annotations;
@@ -16,7 +17,10 @@ namespace RocketModder
     public sealed class MainViewModel : INotifyPropertyChanged
     {
         public Action UpdateUiAction { get; set; }
+        public Action RebindListviewAction { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public Grid GridControl { get; set; }
 
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -49,13 +53,12 @@ namespace RocketModder
         }
 
         private RocketFile _selectedItem;
-        public RocketFile SelectedItem
+        private RocketFile SelectedItem
         {
             get => _selectedItem;
             set
             {
                 _selectedItem = value;
-                if (SelectedItem != null) SelectedOffset = SelectedItem.Offset;
                 OnPropertyChanged();
             }
         }
@@ -69,8 +72,9 @@ namespace RocketModder
                 _selectedOffset = value;
                 SelectedItem.Offset = SelectedOffset;
                 SelectedItem.OffsetInTime = CalcOffsetInTime(SelectedOffset);
-                OnPropertyChanged();
-                UpdateUiAction?.Invoke();
+                OnPropertyChanged(nameof(SelectedOffset));
+                OnPropertyChanged(nameof(SelectedItem));
+                RebindListviewAction?.Invoke();
             }
         }
 
@@ -82,6 +86,16 @@ namespace RocketModder
             {
                 _tracksHeader = value;
                 OnPropertyChanged();
+            }
+        }
+
+        public void UpdateSelectedItem(RocketFile item)
+        {
+            _selectedItem = item;
+            if (_selectedItem != null)
+            {
+                SelectedOffset = _selectedItem.Offset;
+                BuildGrid();
             }
         }
 
@@ -196,9 +210,10 @@ namespace RocketModder
             var maxList = new List<int>();
             var itemMaxList = new List<int>();
             var i = 0;
+            var highestKey = string.Empty;
             foreach (var rocketFile in SelectedRocketFiles)
             {
-                var rocket = ReadRocketFile(rocketFile.Filename, i == 0);
+                var rocket = FileUtils.ReadRocketFile(rocketFile.Filename, i == 0);
                 var highest = -999;
                 foreach (var track in rocket)
                 {
@@ -209,9 +224,12 @@ namespace RocketModder
                         if (highestRow > highest)
                         {
                             highest = highestRow;
+                            highestKey = track.Name;
                         }
                     }
                 }
+
+                rocketFile.HighestKey = highestKey;
                 maxList.Add(highest + prevOffset);
                 itemMaxList.Add(highest);
                 prevOffset = highest + prevOffset;
@@ -233,44 +251,6 @@ namespace RocketModder
             UpdateUiAction?.Invoke();
         }
 
-        private void ReadHeader(XDocument xml)
-        {
-            var hdr = from c in xml.Descendants("tracks")
-                select new TracksHeader
-                {
-                    Rows = int.Parse(c.Attribute("rows")?.Value ?? "0"),
-                    StartRow = int.Parse(c.Attribute("startRow")?.Value ?? "0"),
-                    EndRow = int.Parse(c.Attribute("endRow")?.Value ?? "0"),
-                    RowsPerBeat = int.Parse(c.Attribute("rowsPerBeat")?.Value ?? "0"),
-                    BeatsPerMin = int.Parse(c.Attribute("beatsPerMin")?.Value ?? "0"),
-                };
-            TracksHeader = hdr.FirstOrDefault(); 
-            OnPropertyChanged(nameof(TracksHeader));
-        }
-
-        private List<TrackItem> ReadRocketFile(string filename, bool readHeader = false)
-        {
-            var xml = XDocument.Load(filename);
-
-            if (readHeader) ReadHeader(xml);
-
-            var qry = from c in xml.Descendants("track")
-                select new TrackItem
-                {
-                    Name = c.Attribute("name").Value,
-                    Folded = int.Parse(c.Attribute("folded").Value),
-                    MuteKeyCount = c.Attribute("muteKeyCount").Value,
-                    Color = c.Attribute("color").Value,
-                    Keys = from k in c.Descendants("key")
-                        select new KeyItem
-                        {
-                            Row = int.Parse(k.Attribute("row").Value),
-                            Value = double.Parse(k.Attribute("value").Value, CultureInfo.InvariantCulture),
-                            Interpolation = int.Parse(k.Attribute("interpolation").Value)
-                        }
-                };
-            return qry.ToList();
-        }
 
         private void CleanDuplicates(List<TrackItem> data)
         {
@@ -295,39 +275,12 @@ namespace RocketModder
             }
         }
 
-        private void SaveFile(string filename, IEnumerable<TrackItem> data)
-        {
-            // all data aggregated, generate XML
-            var xd = new XDocument(new XElement("rootElement",
-                new XElement("tracks",
-                    new XAttribute("rows", 10000),
-                    new XAttribute("startRow", 0),
-                    new XAttribute("endRow", 10000),
-                    new XAttribute("rowsPerBeat", 8),
-                    new XAttribute("beatsPerMin", 134),
-                    from track in data
-                    select new XElement("track",
-                        new XAttribute("name", track.Name),
-                        new XAttribute("color", track.Color),
-                        new XAttribute("folded", track.Folded),
-                        from key in track.Keys
-                        select new XElement("key",
-                            new XAttribute("row", key.Row),
-                            new XAttribute("value", key.Value),
-                            new XAttribute("interpolation", key.Interpolation)
-                        )
-                    )
-                )));
-
-            xd.Save(filename);
-        }
-
         private void GenerateFile(string filename)
         {
             var resdata = new List<TrackItem>();
             for (var i = 0; i < SelectedRocketFiles.Count; i++)
             {
-                var rocket = ReadRocketFile(SelectedRocketFiles[i].Filename, i == 0);
+                var rocket = FileUtils.ReadRocketFile(SelectedRocketFiles[i].Filename, i == 0);
                 for (var j = 0; j < rocket.Count; j++)
                 {
                     var item = rocket[j];
@@ -357,7 +310,59 @@ namespace RocketModder
             }
             CleanDuplicates(resdata);
 
-            SaveFile(filename, resdata);
+            FileUtils.SaveFile(filename, resdata);
+        }
+
+        private void BuildGrid()
+        {
+            if (_selectedItem == null) return;
+            var rocketData = FileUtils.ReadRocketFile(_selectedItem.Filename, false);
+            GridControl.ColumnDefinitions.Clear();
+            GridControl.RowDefinitions.Clear();
+            GridControl.Children.Clear();
+            var rd = new RowDefinition {Height = new GridLength(0, GridUnitType.Auto)};
+            GridControl.RowDefinitions.Add(rd);
+            rd = new RowDefinition {Height = new GridLength(1, GridUnitType.Star)};
+            GridControl.RowDefinitions.Add(rd);
+            var i = 0;
+            foreach (var track in rocketData)
+            {
+                var cd = new ColumnDefinition {Width = new GridLength(128)};
+                GridControl.ColumnDefinitions.Add(cd);
+
+                var sp = new StackPanel();
+                var rowCount = 0;
+                foreach (var keyItem in track.Keys)
+                {
+                    var c = "dedede".ParseColor();
+                    var bgc = rowCount.IsOdd() ? new SolidColorBrush(c) : new SolidColorBrush(Colors.White);
+                    var dp = new DockPanel {LastChildFill = true, Margin = new Thickness(4, 0, 4, 0)};
+                    var tbd = new TextBlock {Width = 40, Background = bgc, Text = keyItem.Row.ToString()};
+                    DockPanel.SetDock(tbd, Dock.Left);
+                    dp.Children.Add(tbd);
+                    tbd = new TextBlock
+                    {
+                        TextAlignment = TextAlignment.Right, Text = keyItem.Value.ToString(), Background = bgc
+                    };
+                    DockPanel.SetDock(tbd, Dock.Right);
+                    dp.Children.Add(tbd);
+                    sp.Children.Add(dp);
+                    rowCount++;
+                }
+
+                Grid.SetColumn(sp, i);
+                Grid.SetRow(sp, 1);
+                GridControl.Children.Add(sp);
+
+                var tb = new TextBlock {Text = track.Name, Background = new SolidColorBrush(track.Color.ParseColor())};
+                tb.Margin = new Thickness(4,0,4,0);
+                tb.ToolTip = track.Name;
+                Grid.SetColumn(tb, i);
+                Grid.SetRow(tb, 0);
+                GridControl.Children.Add(tb);
+
+                i++;
+            }
         }
     }
 }
