@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -33,22 +34,30 @@ namespace RocketModder
                 TracsHeader = ReadHeader(xml);
             }
 
-            var qry = from c in xml.Descendants("track")
-                select new TrackItem
-                {
-                    Name = c.Attribute("name").Value,
-                    Folded = int.Parse(c.Attribute("folded").Value),
-                    MuteKeyCount = c.Attribute("muteKeyCount").Value,
-                    Color = c.Attribute("color").Value,
-                    Keys = from k in c.Descendants("key")
-                        select new KeyItem
-                        {
-                            Row = int.Parse(k.Attribute("row").Value),
-                            Value = double.Parse(k.Attribute("value").Value, CultureInfo.InvariantCulture),
-                            Interpolation = int.Parse(k.Attribute("interpolation").Value)
-                        }
-                };
-            return qry.ToList();
+            try
+            {
+                var qry = from c in xml.Descendants("track")
+                    select new TrackItem
+                    {
+                        Name = c.Attribute("name")?.Value,
+                        Folded = int.Parse(c.Attribute("folded")?.Value ?? string.Empty),
+                        MuteKeyCount = c.Attribute("muteKeyCount")?.Value,
+                        Color = c.Attribute("color")?.Value,
+                        Keys = from k in c.Descendants("key")
+                            select new KeyItem
+                            {
+                                Row = int.Parse(k.Attribute("row")?.Value ?? string.Empty),
+                                Value = double.Parse(k.Attribute("value")?.Value ?? string.Empty, CultureInfo.InvariantCulture),
+                                Interpolation = int.Parse(k.Attribute("interpolation")?.Value ?? string.Empty)
+                            }
+                    };
+                return qry.ToList();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return null;
         }
 
         public static void SaveFile(string filename, IEnumerable<TrackItem> data)

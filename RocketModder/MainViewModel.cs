@@ -95,7 +95,10 @@ namespace RocketModder
             if (_selectedItem != null)
             {
                 SelectedOffset = _selectedItem.Offset;
-                BuildGrid();
+                if (_selectedItem != null)
+                {
+                    BuildGrid(_selectedItem.Filename);
+                }
             }
         }
 
@@ -107,6 +110,7 @@ namespace RocketModder
         public RelayCommand DeleteCommand { get; set; }
         public RelayCommand MoveUpCommand { get; set; }
         public RelayCommand MoveDownCommand { get; set; }
+        public RelayCommand PreviewCommand { get; set; }
 
         public MainViewModel()
         {
@@ -149,13 +153,7 @@ namespace RocketModder
                 var sfn = new SaveFileDialog { Filter = "Projects|*.json"};
                 if (sfn.ShowDialog() == true)
                 {
-                    var prj = new ProjectHolder
-                    {
-                        TracksHeader = TracksHeader,
-                        RocketFiles = SelectedRocketFiles.ToList()
-                    };
-                    var json = JsonConvert.SerializeObject(prj);
-                    File.WriteAllText(sfn.FileName, json);
+                    InternalSave(sfn.FileName);
                 }
             });
             DeleteCommand = new RelayCommand(o =>
@@ -187,6 +185,7 @@ namespace RocketModder
                     }
                 }
             });
+            PreviewCommand = new RelayCommand(ExecutePreview);
             TracksHeader = new TracksHeader
             {
                 Rows = 10000,
@@ -196,6 +195,17 @@ namespace RocketModder
                 BeatsPerMin = 128
             };
             OnPropertyChanged(nameof(TracksHeader));
+        }
+
+        private void InternalSave(string filename)
+        {
+            var prj = new ProjectHolder
+            {
+                TracksHeader = TracksHeader,
+                RocketFiles = SelectedRocketFiles.ToList()
+            };
+            var json = JsonConvert.SerializeObject(prj);
+            File.WriteAllText(filename, json);
         }
 
         private TimeSpan CalcOffsetInTime(int offset)
@@ -331,10 +341,9 @@ namespace RocketModder
             FileUtils.SaveFile(filename, resdata);
         }
 
-        private void BuildGrid()
+        private void BuildGrid(string filename)
         {
-            if (_selectedItem == null) return;
-            var rocketData = FileUtils.ReadRocketFile(_selectedItem.Filename, false);
+            var rocketData = FileUtils.ReadRocketFile(filename);
             GridControl.ColumnDefinitions.Clear();
             GridControl.RowDefinitions.Clear();
             GridControl.Children.Clear();
@@ -352,15 +361,15 @@ namespace RocketModder
                 var rowCount = 0;
                 foreach (var keyItem in track.Keys)
                 {
-                    var c = "dedede".ParseColor();
-                    var bgc = rowCount.IsOdd() ? new SolidColorBrush(c) : new SolidColorBrush(Colors.White);
+                    var fallbackColor = "dedede".ParseColor();
+                    var backgroundColor = rowCount.IsOdd() ? new SolidColorBrush(fallbackColor) : new SolidColorBrush(Colors.White);
                     var dp = new DockPanel {LastChildFill = true, Margin = new Thickness(4, 0, 4, 0)};
-                    var tbd = new TextBlock {Width = 40, Background = bgc, Text = keyItem.Row.ToString()};
+                    var tbd = new TextBlock {Width = 40, Background = backgroundColor, Text = keyItem.Row.ToString()};
                     DockPanel.SetDock(tbd, Dock.Left);
                     dp.Children.Add(tbd);
                     tbd = new TextBlock
                     {
-                        TextAlignment = TextAlignment.Right, Text = keyItem.Value.ToString(), Background = bgc
+                        TextAlignment = TextAlignment.Right, Text = keyItem.Value.ToString(), Background = backgroundColor
                     };
                     DockPanel.SetDock(tbd, Dock.Right);
                     dp.Children.Add(tbd);
@@ -381,6 +390,13 @@ namespace RocketModder
 
                 i++;
             }
+        }
+
+        private void ExecutePreview(object obj)
+        {
+            var tmpFile = Path.GetTempFileName();
+            GenerateFile(tmpFile);
+            BuildGrid(tmpFile);
         }
     }
 }

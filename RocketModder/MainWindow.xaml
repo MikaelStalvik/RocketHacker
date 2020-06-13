@@ -122,7 +122,8 @@
                 <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}"/>
                 <Button Content="Save project" Width="80" Command="{Binding SaveProjectCommand}" Margin="4,0,0,0"/>
 
-                <Button Content="Merge" Width="80" Command="{Binding SaveFileCommand}" Margin="8,0,0,0"/>
+                <Button Content="Merge" Width="80" Command="{Binding SaveFileCommand}" Margin="16,0,0,0"/>
+                <Button Content="Preview" Width="80" Command="{Binding PreviewCommand}" Margin="8,0,0,0"/>
 
                 <Button Content="Calculate" Width="80" Command="{Binding CalculateCommand}" DockPanel.Dock="Right" Margin="4,0,0,0"/>
                 <Button Content="Adjust" Width="80" Command="{Binding AdjustCommand}" DockPanel.Dock="Right"/>
