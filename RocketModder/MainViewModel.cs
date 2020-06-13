@@ -285,14 +285,32 @@ namespace RocketModder
                 {
                     var item = rocket[j];
                     var existing = resdata.FirstOrDefault(x => x.Name.Equals(item.Name));
+                    var ofs = SelectedRocketFiles[i].Offset;
                     if (existing == null)
                     {
-                        resdata.Add(item);
+                        var newItem = new TrackItem
+                        {
+                            MuteKeyCount = item.MuteKeyCount,
+                            Color = item.Color,
+                            Name = item.Name,
+                            Folded = item.Folded
+                        };
+                        var keys = new List<KeyItem>();
+                        foreach (var key in item.Keys)
+                        {
+                            keys.Add(new KeyItem
+                            {
+                                Value = key.Value,
+                                Interpolation = key.Interpolation,
+                                Row = key.Row + ofs
+                            });
+                        }
+                        newItem.Keys = keys;
+                        resdata.Add(newItem);
                     }
                     else
                     {
                         // add all keys
-                        var ofs = SelectedRocketFiles[i].Offset;
                         var existingKeys = existing.Keys.ToList();
                         foreach (var key in item.Keys)
                         {

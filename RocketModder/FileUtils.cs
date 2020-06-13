@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -24,6 +25,7 @@ namespace RocketModder
 
         public static List<TrackItem> ReadRocketFile(string filename, bool readHeader = false)
         {
+            if (!File.Exists(filename)) return new List<TrackItem>();
             var xml = XDocument.Load(filename);
 
             if (readHeader)
