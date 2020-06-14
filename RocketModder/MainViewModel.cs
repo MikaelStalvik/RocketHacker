@@ -20,7 +20,7 @@ namespace RocketModder
         public Action RebindListviewAction { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public Grid GridControl { get; set; }
+        public TracksControl GridControl { get; set; }
 
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -344,52 +344,7 @@ namespace RocketModder
         private void BuildGrid(string filename)
         {
             var rocketData = FileUtils.ReadRocketFile(filename);
-            GridControl.ColumnDefinitions.Clear();
-            GridControl.RowDefinitions.Clear();
-            GridControl.Children.Clear();
-            var rd = new RowDefinition {Height = new GridLength(0, GridUnitType.Auto)};
-            GridControl.RowDefinitions.Add(rd);
-            rd = new RowDefinition {Height = new GridLength(1, GridUnitType.Star)};
-            GridControl.RowDefinitions.Add(rd);
-            var i = 0;
-            foreach (var track in rocketData)
-            {
-                var cd = new ColumnDefinition {Width = new GridLength(128)};
-                GridControl.ColumnDefinitions.Add(cd);
-
-                var sp = new StackPanel();
-                var rowCount = 0;
-                foreach (var keyItem in track.Keys)
-                {
-                    var fallbackColor = "dedede".ParseColor();
-                    var backgroundColor = rowCount.IsOdd() ? new SolidColorBrush(fallbackColor) : new SolidColorBrush(Colors.White);
-                    var dp = new DockPanel {LastChildFill = true, Margin = new Thickness(4, 0, 4, 0)};
-                    var tbd = new TextBlock {Width = 40, Background = backgroundColor, Text = keyItem.Row.ToString()};
-                    DockPanel.SetDock(tbd, Dock.Left);
-                    dp.Children.Add(tbd);
-                    tbd = new TextBlock
-                    {
-                        TextAlignment = TextAlignment.Right, Text = keyItem.Value.ToString(), Background = backgroundColor
-                    };
-                    DockPanel.SetDock(tbd, Dock.Right);
-                    dp.Children.Add(tbd);
-                    sp.Children.Add(dp);
-                    rowCount++;
-                }
-
-                Grid.SetColumn(sp, i);
-                Grid.SetRow(sp, 1);
-                GridControl.Children.Add(sp);
-
-                var tb = new TextBlock {Text = track.Name, Background = new SolidColorBrush(track.Color.ParseColor())};
-                tb.Margin = new Thickness(4,0,4,0);
-                tb.ToolTip = track.Name;
-                Grid.SetColumn(tb, i);
-                Grid.SetRow(tb, 0);
-                GridControl.Children.Add(tb);
-
-                i++;
-            }
+            GridControl.RenderControl(rocketData);
         }
 
         private void ExecutePreview(object obj)

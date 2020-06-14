@@ -14,7 +14,7 @@ namespace RocketModder
         public MainWindow()
         {
             InitializeComponent();
-            _vm.GridControl = DetailsGrid;
+            _vm.GridControl = TracksControl;
             DataContext = _vm;
             ListView.ItemsSource = _vm.SelectedRocketFiles;
             _vm.UpdateUiAction += () =>

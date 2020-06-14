@@ -99,9 +99,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Text="Preview" FontWeight="Bold" Background="#dfdfdf"/>
-                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto">
-                    <Grid x:Name="DetailsGrid"/>
-                </ScrollViewer>
+                <local:TracksControl Grid.Row="1" x:Name="TracksControl"/>
             </Grid>
 
             <DockPanel Grid.Row="3" LastChildFill="False" Margin="0,8,0,0">
