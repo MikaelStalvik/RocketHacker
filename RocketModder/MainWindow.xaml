@@ -21,6 +21,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <ListView Grid.Row="0" ItemsSource="{Binding SelectedRocketFiles}" HorizontalAlignment="Stretch" x:Name="ListView" SelectionChanged="ListView_OnSelectionChanged">
@@ -102,7 +103,12 @@
                 <local:TracksControl Grid.Row="1" x:Name="TracksControl"/>
             </Grid>
 
-            <DockPanel Grid.Row="3" LastChildFill="False" Margin="0,8,0,0">
+            <DockPanel Grid.Row="3">
+                <TextBlock Text="BPM" FontWeight="Bold" Margin="0,0,4,0"/>
+                <TextBox Text="{Binding Bpm, Mode=TwoWay}"/>
+            </DockPanel>
+
+            <DockPanel Grid.Row="4" LastChildFill="False" Margin="0,8,0,0">
                 <Button Content="+" Width="32" Command="{Binding AddFilesCommand}" Margin="0,0,0,0"/>
                 <Button Content="-" Width="32" Command="{Binding DeleteCommand}" Margin="4,0,0,0"/>
                 <Button Content="^" Width="32" Command="{Binding MoveUpCommand}" Margin="4,0,0,0"/>
@@ -116,7 +122,7 @@
                 </DockPanel>
             </DockPanel>
 
-            <DockPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,8,0,0">
+            <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,8,0,0">
                 <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}"/>
                 <Button Content="Save project" Width="80" Command="{Binding SaveProjectCommand}" Margin="4,0,0,0"/>
 

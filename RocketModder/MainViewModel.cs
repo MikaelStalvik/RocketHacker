@@ -5,9 +5,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using RocketModder.Annotations;
@@ -29,6 +26,17 @@ namespace RocketModder
         }
 
         public ObservableCollection<RocketFile> SelectedRocketFiles = new ObservableCollection<RocketFile>();
+
+        private int _bpm;
+        public int Bpm
+        {
+            get => _bpm;
+            set
+            {
+                _bpm = value;
+                OnPropertyChanged();
+            }
+        }
 
         private TimeSpan _calculatedLength;
         public TimeSpan CalculatedLength
@@ -144,6 +152,7 @@ namespace RocketModder
                     var json = File.ReadAllText(ofn.FileName);
                     var prj = JsonConvert.DeserializeObject<ProjectHolder>(json);
                     TracksHeader = prj.TracksHeader;
+                    Bpm = TracksHeader.BeatsPerMin;
                     SelectedRocketFiles = new ObservableCollection<RocketFile>(prj.RocketFiles);
                     UpdateUiAction?.Invoke();
                 }
@@ -195,10 +204,12 @@ namespace RocketModder
                 BeatsPerMin = 128
             };
             OnPropertyChanged(nameof(TracksHeader));
+            Bpm = 133;
         }
 
         private void InternalSave(string filename)
         {
+            TracksHeader.BeatsPerMin = _bpm;
             var prj = new ProjectHolder
             {
                 TracksHeader = TracksHeader,
@@ -338,7 +349,7 @@ namespace RocketModder
             }
             CleanDuplicates(resdata);
 
-            FileUtils.SaveFile(filename, resdata);
+            FileUtils.SaveFile(filename, resdata, _bpm);
         }
 
         private void BuildGrid(string filename)

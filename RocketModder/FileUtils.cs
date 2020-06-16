@@ -60,7 +60,7 @@ namespace RocketModder
             return null;
         }
 
-        public static void SaveFile(string filename, IEnumerable<TrackItem> data)
+        public static void SaveFile(string filename, IEnumerable<TrackItem> data, int bpm)
         {
             // all data aggregated, generate XML
             var xd = new XDocument(new XElement("rootElement",
@@ -69,7 +69,7 @@ namespace RocketModder
                     new XAttribute("startRow", 0),
                     new XAttribute("endRow", 10000),
                     new XAttribute("rowsPerBeat", 8),
-                    new XAttribute("beatsPerMin", 134),
+                    new XAttribute("beatsPerMin", bpm),
                     from track in data
                     select new XElement("track",
                         new XAttribute("name", track.Name),
