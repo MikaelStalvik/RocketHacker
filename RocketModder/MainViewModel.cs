@@ -97,6 +97,18 @@ namespace RocketModder
             }
         }
 
+        private string _totalLength;
+
+        public string TotalLength
+        {
+            get => _totalLength;
+            set
+            {
+                _totalLength = value;
+                OnPropertyChanged();
+            }
+        }
+
         public void UpdateSelectedItem(RocketFile item)
         {
             _selectedItem = item;
@@ -156,6 +168,7 @@ namespace RocketModder
                     SelectedRocketFiles = new ObservableCollection<RocketFile>(prj.RocketFiles);
                     UpdateUiAction?.Invoke();
                 }
+                CalculateCommand.Execute(null);
             });
             SaveProjectCommand = new RelayCommand(o =>
             {
@@ -267,6 +280,14 @@ namespace RocketModder
                 SelectedRocketFiles[i].Offset = maxList[i - 1];
                 SelectedRocketFiles[i].OffsetInTime = CalcOffsetInTime(SelectedRocketFiles[i].Offset);
             }
+
+            var sum = 0.0;
+            foreach (var item in SelectedRocketFiles)
+            {
+                sum += item.LengthInTime.TotalSeconds;
+            }
+            var td = TimeSpan.FromSeconds(sum);
+            TotalLength = $"{td.Minutes}:{td.Seconds}.{td.Milliseconds}";
 
             OnPropertyChanged(nameof(SelectedRocketFiles));
             UpdateUiAction?.Invoke();

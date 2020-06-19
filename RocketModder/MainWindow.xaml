@@ -24,7 +24,12 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ListView Grid.Row="0" ItemsSource="{Binding SelectedRocketFiles}" HorizontalAlignment="Stretch" x:Name="ListView" SelectionChanged="ListView_OnSelectionChanged">
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ListView Grid.Row="0" ItemsSource="{Binding SelectedRocketFiles}" HorizontalAlignment="Stretch" x:Name="ListView" SelectionChanged="ListView_OnSelectionChanged">
                 <ListView.Resources>
                     <DataTemplate x:Key="RightAlign">
                         <TextBlock HorizontalAlignment="Right" Text="{Binding}"/>
@@ -92,6 +97,12 @@
 
             </ListView>
 
+                <DockPanel Grid.Row="1">
+                    <TextBlock Text="Total length" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding TotalLength}" Margin="4,0,0,0"/>
+                </DockPanel>
+            </Grid>
+
             <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
 
             <Grid Grid.Row="2">
@@ -122,7 +133,7 @@
                 </DockPanel>
             </DockPanel>
 
-            <DockPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,8,0,0">
+            <DockPanel Grid.Row="5" Grid.Column="0" LastChildFill="False" Margin="0,8,0,0">
                 <Button Content="Load project" Width="80" Command="{Binding LoadProjectCommand}"/>
                 <Button Content="Save project" Width="80" Command="{Binding SaveProjectCommand}" Margin="4,0,0,0"/>
 
