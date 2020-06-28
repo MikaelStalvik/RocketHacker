@@ -16,9 +16,6 @@ Design your Rocket scenes individually and merge your result when you are done.
 - .NET Core 3.1
 - A Rocket editor of your choise for testing, we can recommend Emoons Rocket Editor, https://github.com/emoon/rocket
 
-# Missing features
-- No editing of BPM/Rows per bar (read from the source file)
-
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
