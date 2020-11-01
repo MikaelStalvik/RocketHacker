@@ -103,7 +103,7 @@
                 </DockPanel>
             </Grid>
 
-            <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
+            <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="White"/>
 
             <Grid Grid.Row="2">
                 <Grid.RowDefinitions>
@@ -139,6 +139,7 @@
 
                 <Button Content="Merge" Width="80" Command="{Binding SaveFileCommand}" Margin="16,0,0,0"/>
                 <Button Content="Preview" Width="80" Command="{Binding PreviewCommand}" Margin="8,0,0,0"/>
+                <Button Content="Cut" Width="80" Command="{Binding CutCommand}" Margin="8,0,0,0"/>
 
                 <Button Content="Calculate" Width="80" Command="{Binding CalculateCommand}" DockPanel.Dock="Right" Margin="4,0,0,0"/>
                 <Button Content="Adjust" Width="80" Command="{Binding AdjustCommand}" DockPanel.Dock="Right"/>

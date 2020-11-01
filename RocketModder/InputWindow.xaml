@@ -5,16 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RocketModder"
         mc:Ignorable="d"
-        Title="InputWindow" Height="450" Width="800">
-    <Grid>
+        WindowStyle="ToolWindow"
+        WindowStartupLocation="CenterOwner"
+        Title="Input value" Height="160" Width="320">
+    <Grid Margin="8">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBox Grid.Row="0" x:Name="InputTb" Text="0"/>
-        <DockPanel Grid.Row="1" LastChildFill="False">
-            <Button Width="80" Content="OK" IsDefault="True" DockPanel.Dock="Right"/>
-            <Button Width="80" Content="Cancel" IsDefault="True" DockPanel.Dock="Right"/>
+        <DockPanel Grid.Row="2" LastChildFill="False">
+            <Button Width="80" Content="OK" IsDefault="True" DockPanel.Dock="Right" Click="OkButtonBase_OnClick"/>
+            <Button Width="80" Content="Cancel" IsDefault="True" DockPanel.Dock="Right" Margin="0,0,8,0" Click="CancelButtonBase_OnClick"/>
         </DockPanel>
     </Grid>
 </Window>

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Xps.Packaging;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using RocketModder.Annotations;
@@ -131,6 +132,7 @@ namespace RocketModder
         public RelayCommand MoveUpCommand { get; set; }
         public RelayCommand MoveDownCommand { get; set; }
         public RelayCommand PreviewCommand { get; set; }
+        public RelayCommand CutCommand { get; set; }
 
         public MainViewModel()
         {
@@ -205,6 +207,37 @@ namespace RocketModder
                     {
                         SelectedRocketFiles.Move(idx, idx + 1);
                     }
+                }
+            });
+            CutCommand = new RelayCommand(o =>
+            {
+                var (result, value) = InputWindow.PromptForValue();
+                if (result)
+                {
+                    var filename = SelectedItem.Filename;
+                    var rocketData = FileUtils.ReadRocketFile(filename);
+                    foreach (var trackItem in rocketData)
+                    {
+                        var res = new List<KeyItem>();
+                        foreach (var key in trackItem.Keys)
+                        {
+                            if (key.Row <= value) res.Add(new KeyItem
+                            {
+                                Interpolation = key.Interpolation,
+                                Row = key.Row,
+                                Value = key.Value
+                            });
+                        }
+                        trackItem.Keys = res;
+                    }
+
+                    var sourcePath = Path.GetDirectoryName(SelectedItem.Filename);
+                    var orgFilename = Path.GetFileName(SelectedItem.Filename);
+                    var backupFile = $"org_{orgFilename}";
+                    backupFile = Path.Combine(sourcePath, backupFile);
+                    File.Copy(SelectedItem.Filename, backupFile);
+                    FileUtils.SaveFile(SelectedItem.Filename, rocketData, Bpm);
+                    CalculateCommand.Execute(null);
                 }
             });
             PreviewCommand = new RelayCommand(ExecutePreview);
