@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows.Xps.Packaging;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using RocketModder.Annotations;
@@ -235,6 +234,7 @@ namespace RocketModder
                     var orgFilename = Path.GetFileName(SelectedItem.Filename);
                     var backupFile = $"org_{orgFilename}";
                     backupFile = Path.Combine(sourcePath, backupFile);
+                    if (File.Exists(backupFile)) File.Delete(backupFile);
                     File.Copy(SelectedItem.Filename, backupFile);
                     FileUtils.SaveFile(SelectedItem.Filename, rocketData, Bpm);
                     CalculateCommand.Execute(null);
@@ -280,7 +280,7 @@ namespace RocketModder
             var highestKey = string.Empty;
             foreach (var rocketFile in SelectedRocketFiles)
             {
-                var rocket = FileUtils.ReadRocketFile(rocketFile.Filename, i == 0);
+                var rocket = FileUtils.ReadRocketFile(rocketFile.Filename, true); //i == 0
                 var highest = -999;
                 foreach (var track in rocket)
                 {
@@ -320,7 +320,7 @@ namespace RocketModder
                 sum += item.LengthInTime.TotalSeconds;
             }
             var td = TimeSpan.FromSeconds(sum);
-            TotalLength = $"{td.Minutes}:{td.Seconds}.{td.Milliseconds}";
+            TotalLength = $"{td.Minutes:00}:{td.Seconds:00}.{td.Milliseconds:00}";
 
             OnPropertyChanged(nameof(SelectedRocketFiles));
             UpdateUiAction?.Invoke();
@@ -355,7 +355,7 @@ namespace RocketModder
             var resdata = new List<TrackItem>();
             for (var i = 0; i < SelectedRocketFiles.Count; i++)
             {
-                var rocket = FileUtils.ReadRocketFile(SelectedRocketFiles[i].Filename, i == 0);
+                var rocket = FileUtils.ReadRocketFile(SelectedRocketFiles[i].Filename, true);
                 for (var j = 0; j < rocket.Count; j++)
                 {
                     var item = rocket[j];
@@ -408,7 +408,7 @@ namespace RocketModder
 
         private void BuildGrid(string filename)
         {
-            var rocketData = FileUtils.ReadRocketFile(filename);
+            var rocketData = FileUtils.ReadRocketFile(filename, true);
             GridControl.RenderControl(rocketData);
         }
 
